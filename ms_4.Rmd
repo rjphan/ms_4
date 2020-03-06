@@ -1,0 +1,91 @@
+---
+title: "ms_4"
+author: "Rachel Phan"
+date: "3/4/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(readxl)
+library(pdftools)
+library(stringr)
+library(tm)
+
+```
+
+# GitHub Repo Link
+
+https://github.com/rjphan/ms_4.git
+
+# Data
+
+```{r Clery data from HUPD, include = FALSE}
+
+# Data from
+# https://www.hupd.harvard.edu/files/hupd/files/19_asr_cambridge_campus_criminal_statistics.pdf,
+# HUPD: "Annual Security Report 2019"
+
+# I read in the data using pdf_text to try and make the report more readable. I
+# was able to get some of the data into columns. However, I still need to
+# separate and factor the variables, and then separate the numeric variables
+# into different columns and create new variables.
+
+hupd_clery_report <- pdf_text("19_asr_cambridge_campus_criminal_statistics.pdf") %>% 
+  read_lines() %>% 
+  strsplit(split = "\n")
+
+View(hupd_clery_report)
+
+```
+
+```{r rape and sexual assault data, include = FALSE}
+
+# Data from https://www.bjs.gov/index.cfm?ty=tp&tid=317, the Bureau of Justice
+# Statisics: "Rape and Sexual Assault Among College-age Females, 1995-2013"
+
+# I read in the data using read_csv to try and make the report more readable. I
+# was able to get some of the data into columns. However, I still need to factor
+# the variables. I also need to keep one observation to one per row and clean up
+# the data that way.
+
+sex_assault_location_and_time <- read_csv("rsavcaf9513at05.csv", skip = 8)
+
+sex_assault_location_and_time
+
+View(sex_assault_location_and_time)
+
+```
+
+```{r criminal data}
+
+# Data from https://www.bjs.gov/index.cfm?ty=tp&tid=317, the Bureau of Justice
+# Statistics: "Criminal Victimization, 2014"
+
+# I read in the data using read_csv to try and make the report more readable. I
+# was able to get some of the data into columns. However, I still need to change
+# some observations into variables, and then factor the variables to create
+# levels. I tried a little bit with mutating "type_of_crime," but the leveling
+# did not go as I expected. I also need to keep one observation to one per row
+# and clean up the data that way.
+
+criminal_rates <- read_csv("cv14at05.csv", skip = 10)
+
+sapply(criminal_rates, class)
+
+criminal_rates_clean <- criminal_rates %>% 
+  mutate("type_of_crime" = X1)
+
+criminal_rates_clean %>% 
+  factor("type_of_crime", levels = c("Violent  Crime", "Serious Violent Crime", "Property Crime"))
+
+criminal_rates_clean$type_of_crime = as.factor(criminal_rates_clean$type_of_crime) 
+
+criminal_rates_clean <- criminal_rates %>% 
+  select(-X1, -X7)
+  
+View(criminal_rates_clean)
+
+```
